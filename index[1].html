@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#1e824c">
+<title>शेतकरी मित्र | Shetkari Mitra</title>
+<link rel="manifest" href="manifest.json">
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
+</script>
+<style>
+  :root {
+    --cream: #fcf8ee;
+    --card: #ffffff;
+    --green: #1e824c;
+    --green-bright: #2ecc71;
+    --green-dark: #145a32;
+    --orange: #e67e22;
+    --amber: #f39c12;
+    --blue: #2563eb;
+    --red: #e74c3c;
+    --text: #1c2833;
+    --muted: #566573;
+    --ln: #d5e5d5;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: system-ui, -apple-system, 'Noto Sans Devanagari', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    background: #dfe8df;
+    display: flex;
+    justify-content: center;
+    color: var(--text);
+  }
+  #app {
+    width: 100%;
+    max-width: 460px;
+    min-height: 100vh;
+    background: var(--cream);
+    position: relative;
+    padding-bottom: 86px;
+    box-shadow: 0 0 24px rgba(0,0,0,0.14);
+    overflow-x: hidden;
+  }
+  .topbar {
+    background: linear-gradient(135deg, var(--green), var(--green-dark));
+    color: #fff;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 19px;
+    font-weight: 900;
+  }
+  .lang-pills { display: flex; gap: 4px; }
+  .lang-pill {
+    background: rgba(255,255,255,0.2);
+    border: 1.5px solid rgba(255,255,255,0.45);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+  }
+  .lang-pill.active {
+    background: #fff;
+    color: var(--green-dark);
+    border-color: #fff;
+  }
+  .p { padding: 12px 14px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tile {
+    border: 0;
+    border-radius: 22px;
+    padding: 18px 10px;
+    color: #fff;
+    font-weight: 900;
+    font-size: 16px;
+    min-height: 126px;
+    box-shadow: 0 5px 12px rgba(0,0,0,0.14);
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.12s;
+  }
+  .tile:active { transform: scale(0.96); }
+  .tile span { display: block; font-size: 42px; margin-bottom: 6px; }
+  .tile small { display: block; font-weight: 700; opacity: 0.92; font-size: 12px; margin-top: 2px; }
+  .card {
+    background: var(--card);
+    border: 2.5px solid var(--ln);
+    border-radius: 22px;
+    padding: 15px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  }
+  h2 { font-size: 18px; color: var(--green-dark); margin: 4px 0 10px; font-weight: 900; }
+  input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #cbd5e1;
+    border-radius: 14px;
+    margin: 4px 0 8px;
+    font-size: 16px;
+    font-weight: 700;
+    background: #fff;
+    color: var(--text);
+  }
+  .btn {
+    width: 100%;
+    border: 0;
+    border-radius: 16px;
+    padding: 14px;
+    background: var(--green);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 900;
+    margin: 4px 0;
+    cursor: pointer;
+  }
+  .btn.o { background: var(--amber); color: #1c2833; }
+  .btn.r { background: var(--red); color: #fff; }
+  .btn.s { background: #145a32; color: #fff; }
+  .btn.b { background: var(--blue); color: #fff; }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+  .tag {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background: #dcfce7;
+    color: #145a32;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .warn {
+    background: #fef3c7;
+    color: #78350f;
+    border-left: 4px solid var(--amber);
+    padding: 10px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .big { font-size: 26px; font-weight: 900; color: var(--green); }
+  .sms {
+    background: #1e293b;
+    color: #86efac;
+    font-family: monospace;
+    padding: 12px;
+    border-radius: 14px;
+    font-size: 13px;
+    white-space: pre-wrap;
+    margin: 8px 0;
+  }
+  /* Map styles */
+  .map-wrapper {
+    border-radius: 24px;
+    overflow: hidden;
+    position: relative;
+    height: 330px;
+    border: 3px solid var(--green);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.16);
+    background: #1f3a24;
+    margin-bottom: 12px;
+  }
+  .map-badge-top {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(20, 30, 24, 0.86);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 14px;
+    font-size: 12px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 10;
+  }
+  .gps-dot { width: 9px; height: 9px; border-radius: 50%; background: #2ecc71; box-shadow: 0 0 8px #2ecc71; }
+  .open-gmaps-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #fff;
+    color: #1c2833;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 900;
+    cursor: pointer;
+    z-index: 10;
+  }
+  .map-pin {
+    position: absolute;
+    transform: translate(-50%, -100%);
+    cursor: pointer;
+    text-align: center;
+    z-index: 8;
+  }
+  .map-pin.selected { transform: translate(-50%, -108%) scale(1.12); z-index: 12; }
+  .pin-bubble {
+    width: 42px;
+    height: 42px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 4px;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+  }
+  .pin-bubble span { transform: rotate(45deg); font-size: 20px; }
+  .pin-bubble.worker { background: #f1c40f; }
+  .pin-bubble.tractor { background: #2980b9; }
+  .pin-bubble.me { background: #2ecc71; }
+  .pin-label {
+    background: rgba(15, 23, 42, 0.88);
+    color: #fff;
+    padding: 2px 7px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .distance-panel {
+    background: #1a221d;
+    color: #fff;
+    border-radius: 22px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+  }
+  /* Keyboard & Handwriting */
+  .keyboard-box { background: #e2e8f0; border-radius: 18px; padding: 8px 5px; margin-top: 8px; }
+  .kb-row { display: flex; justify-content: center; gap: 4px; margin-bottom: 5px; }
+  .key-btn {
+    background: #fff;
+    border: none;
+    border-bottom: 3px solid #94a3b8;
+    border-radius: 8px;
+    min-width: 28px;
+    height: 40px;
+    font-size: 17px;
+    font-weight: 800;
+    cursor: pointer;
+    flex: 1;
+    max-width: 40px;
+  }
+  .key-btn.wide { max-width: none; flex: 2; font-size: 13px; background: #cbd5e1; }
+  .key-btn.space { max-width: none; flex: 4; font-size: 13px; }
+  canvas#hwCanvas {
+    width: 100%;
+    height: 160px;
+    background: #fdfbf7;
+    border-radius: 14px;
+    border: 2px dashed var(--green);
+    touch-action: none;
+    display: block;
+    margin: 6px 0;
+  }
+  /* Weather */
+  .weather-card {
+    background: linear-gradient(145deg, #2563eb, #1d4ed8);
+    color: #fff;
+    border-radius: 24px;
+    padding: 18px;
+    margin-bottom: 12px;
+  }
+  /* Bottom Nav */
+  .nav {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    max-width: 460px;
+    display: flex;
+    background: #fff;
+    border-top: 2px solid var(--ln);
+    padding: 6px 0 env(safe-area-inset-bottom, 6px);
+    z-index: 40;
+  }
+  .nav button {
+    flex: 1;
+    border: 0;
+    background: none;
+    padding: 4px 0;
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .nav button span { display: block; font-size: 22px; margin-bottom: 2px; }
+  .nav .on { color: var(--green); }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num = v => { v = parseFloat(v); return isFinite(v) && v >= 0 ? v : 0; };
+const ld = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } };
+const sv = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+
+let users = ld('sm_users', [
+  { phone: '9876543210', name: 'रमेश पाटील', role: 'worker', village: 'अष्टा', salt: 'demo', hash: 'demo' },
+  { phone: '9876543211', name: 'लता जाधव', role: 'worker', village: 'कराड', salt: 'demo', hash: 'demo' }
+]);
+let me = ld('sm_sess', null);
+let jobs = ld('sm_jobs', [
+  { id: 1001, work: 'ऊस तोडणी', village: 'अष्टा', date: 'उद्या सकाळी ७ वा.', wage: 500, need: 2, interest: ['9876543210'], confirmed: [], status: 'open', farmer: 'demo' }
+]);
+let wages = ld('sm_wages', { rate: 300, paid: {} });
+let tasks = ld('sm_tasks', {});
+let diary = ld('sm_diary', []);
+
+let S = {
+  lang: 'mr',
+  v: 'home',
+  auth: 'login',
+  roleQuick: 'farmer',
+  ans: 'नमस्कार! बोलून, टाइप करून किंवा बोटाने लिहून शेती, हवामान, बाजारभाव किंवा कामाबद्दल विचारा.',
+  queryText: '',
+  aiMode: 'voice',
+  listen: false,
+  gpsMode: 'gmaps',
+  selectedPinId: 1,
+  userCoords: { lat: 16.9482, lng: 74.4093 },
+  locIdx: 0,
+  log: '',
+  calc: null,
+  calcIn: [],
+  learn: null,
+  crop: 'ऊस',
+  strokes: []
+};
+
+const LANGS = {
+  mr: { bcp: 'mr-IN', title: 'शेतकरी मित्र', rows: [
+    ['अ','आ','इ','ई','उ','ऊ','ए','ऐ','ओ','औ'],
+    ['क','ख','ग','घ','च','छ','ज','झ','ट','ठ'],
+    ['त','थ','द','ध','न','प','फ','ब','भ','म'],
+    ['य','र','ल','व','श','ष','स','ह','ळ','ा','ि','ी','ु','ू','े','ो','ं']
+  ]},
+  hi: { bcp: 'hi-IN', title: 'किसान मित्र', rows: [
+    ['अ','आ','इ','ई','उ','ऊ','ए','ऐ','ओ','औ'],
+    ['क','ख','ग','घ','च','छ','ज','झ','ट','ठ'],
+    ['त','थ','द','ध','न','प','फ','ब','भ','म'],
+    ['य','र','ल','व','श','स','ह','ा','ि','ी','ु','ू','े','ो','ं']
+  ]},
+  en: { bcp: 'en-IN', title: 'Shetkari Mitra', rows: [
+    ['Q','W','E','R','T','Y','U','I','O','P'],
+    ['A','S','D','F','G','H','J','K','L'],
+    ['Z','X','C','V','B','N','M','?']
+  ]}
+};
+
+const PINS = [
+  { id: 1, type: 'worker', name: 'रमेश मजूर', x: 32, y: 42, steps: 650, mins: 7, dLat: 0.004, dLng: -0.003 },
+  { id: 2, type: 'worker', name: 'लता व गट', x: 34, y: 68, steps: 1500, mins: 15, dLat: -0.006, dLng: -0.002 },
+  { id: 3, type: 'tractor', name: 'संजय ट्रॅक्टर', x: 68, y: 40, steps: 1100, mins: 11, dLat: 0.005, dLng: 0.006 }
+];
+
+const LOCATIONS = [
+  { name: 'अष्टा / सांगली', query: 'Ashta, Sangli, Maharashtra', temp: '29°C', humidity: '54%', rain: '10%', wind: '12 km/h', soil: 'काळी कसदार जमीन', ph: '6.8 (उत्तम)' },
+  { name: 'पंढरपूर / सोलापूर', query: 'Pandharpur, Maharashtra', temp: '31°C', humidity: '46%', rain: '5%', wind: '15 km/h', soil: 'मध्यम काळी माती', ph: '7.1 (चांगली)' },
+  { name: 'कराड / सातारा', query: 'Karad, Maharashtra', temp: '28°C', humidity: '58%', rain: '15%', wind: '10 km/h', soil: 'तांबडी व काळी जमीन', ph: '6.5 (उत्तम)' }
+];
+
+const LEARN = [
+  ['🧪', 'खते (Fertilizers)', 'कंपोस्ट, गांडूळखत, शेणखत ही सेंद्रिय खते मातीचा पोत सुधारतात. युरिया (46% N), DAP (18:46:0), MOP (0:0:60) ही रासायनिक खते आहेत. मात्रा माती परीक्षण व कृषी शिफारशीनुसारच ठरवा.'],
+  ['🌿', 'तण ओळख (Weeds)', 'गाजर गवत (Parthenium): हातमोजे व मास्क वापरा, फुलोऱ्यापूर्वी काढा. लव्हाळा (Cyperus): कंद जमिनीत राहतात, वारंवार काढा. हरळी (Cynodon): धावती खोडे गोळा करा.'],
+  ['🌱', 'जमीन व सिंचन', 'काळी जमीन: ओलावा जास्त धरते. ठिबक सिंचन: पाण्याची ५०% बचत होते, फिल्टर नियमित साफ ठेवा.'],
+  ['🚑', 'आरोग्य व सुरक्षा (112)', 'उष्माघात किंवा औषध फवारणीत विषबाधा झाल्यास त्वरित 112 वर कॉल करा. फवारणी करताना मास्क व हातमोजे वापरा.'],
+  ['🏛️', 'सरकारी योजना व निर्यात', 'PM-KISAN, पीक विमा, सिंचन अनुदान: pmkisan.gov.in व agri.maharashtra.gov.in वर तपासा. निर्यातीसाठी IEC व APEDA नोंदणी आवश्यक (apeda.gov.in).']
+];
+
+const save = () => {
+  sv('sm_jobs', jobs);
+  sv('sm_wages', wages);
+  sv('sm_tasks', tasks);
+  sv('sm_diary', diary);
+};
+
+const speak = txt => {
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(txt);
+    u.lang = LANGS[S.lang].bcp;
+    u.rate = 0.92;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+};
+
+const go = v => { S.v = v; render(); window.scrollTo(0, 0); };
+
+// Auth
+async function hp(pw, salt) {
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(salt + pw));
+  return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+}
+const cu = () => users.find(u => u.phone === me);
+const WN = p => (users.find(u => u.phone === p) || {}).name || p;
+
+async function doReg() {
+  const name = $('an').value.trim(), ph = $('ap').value.trim(), pw = $('aw').value;
+  if (!name || !/^[6-9]\d{9}$/.test(ph)) return alert('नाव व बरोबर 10 अंकी मोबाईल नंबर टाका');
+  if (pw.length < 6) return alert('पासवर्ड किमान 6 अक्षरांचा हवा');
+  if (users.some(u => u.phone === ph)) return alert('हा नंबर आधीच नोंदणीकृत आहे');
+  const salt = [...crypto.getRandomValues(new Uint8Array(8))].map(x => x.toString(16)).join('');
+  users.push({ phone: ph, name, role: $('ar').value, village: $('av').value.trim() || 'अष्टा', salt, hash: await hp(pw, salt) });
+  sv('sm_users', users);
+  me = ph; sv('sm_sess', me); render();
+}
+
+async function doLogin() {
+  const ph = $('ap').value.trim(), u = users.find(x => x.phone === ph);
+  if (u && await hp($('aw').value, u.salt) === u.hash) {
+    me = ph; sv('sm_sess', me); return render();
+  }
+  alert('मोबाईल नंबर किंवा पासवर्ड चुकीचा');
+}
+
+function quickDemoLogin(role) {
+  const ph = role === 'farmer' ? '9000000001' : '9876543210';
+  if (!users.some(u => u.phone === ph)) {
+    users.push({ phone: ph, name: role === 'farmer' ? 'शेतकरी साहेब' : 'रमेश पाटील', role, village: 'अष्टा', salt: 'demo', hash: 'demo' });
+    sv('sm_users', users);
+  }
+  me = ph; sv('sm_sess', me); render();
+}
+
+function logout() { me = null; sv('sm_sess', null); render(); }
+
+// Voice & AI
+function askAI(q) {
+  const text = (q !== undefined ? q : S.queryText).trim();
+  if (!text) return;
+  S.queryText = text;
+  const low = text.toLowerCase();
+  let a = '';
+  if (/पाऊस|हवामान|मौसम|weather/.test(low)) {
+    a = 'आज हवामान स्वच्छ राहील, तापमान २९°C आहे आणि पुढील ३ दिवस पावसाची शक्यता नाही.';
+  } else if (/भाव|मंडी|कांदा|सोयाबीन|price/.test(low)) {
+    a = 'आज बाजारात सोयाबीन ४,६५० रुपये क्विंटल आणि कांदा २,२०० रुपये क्विंटल दराने विकला जात आहे.';
+  } else if (/पाणी|सिंचन|water/.test(low)) {
+    a = 'पाणी देण्यापूर्वी मातीचा ओलावा हाताने तपासा. ठिबक सिंचनाने ५०% पाण्याची बचत होते.';
+  } else if (/मजूर|काम|पगार|wage|job/.test(low)) {
+    a = 'काम व कामगार विभागात नवीन काम टाकता येते आणि मजुरांची हजेरी व पगार मोजता येतो.';
+  } else {
+    a = `"${text}" बद्दल माहिती: मी तुमचा शेतकरी मित्र आहे. हवामान, सिंचन, खते, मजुरी किंवा बाजारभावाबद्दल विचारा.`;
+  }
+  S.ans = a;
+  speak(a);
+  render();
+}
+
+function startMic() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { alert('या ब्राउझरमध्ये माईक ओळख उपलब्ध नाही. खाली टाइप करा.'); return; }
+  const r = new SR();
+  r.lang = LANGS[S.lang].bcp;
+  S.listen = true; render();
+  r.onresult = e => { S.listen = false; askAI(e.results[0][0].transcript); };
+  r.onerror = r.onend = () => { S.listen = false; render(); };
+  try { r.start(); } catch (e) { S.listen = false; render(); }
+}
+
+// Jobs & SMS
+function postJob() {
+  const w = $('jw').value.trim(), v = $('jv').value.trim(), d = $('jd').value.trim(), wg = num($('jg').value), n = Math.floor(num($('jn').value));
+  if (!w || !v || !wg || !n) return alert('सर्व माहिती भरा');
+  jobs.unshift({ id: Math.max(1000, ...jobs.map(j => j.id)) + 1, work: w, village: v, date: d || 'उद्या', wage: wg, need: n, interest: [], confirmed: [], status: 'open', farmer: me });
+  save(); render();
+}
+
+function applyJob(id) {
+  const j = jobs.find(x => x.id == id);
+  if (!j || j.status !== 'open') return;
+  j.interest = j.interest.includes(me) ? j.interest.filter(x => x !== me) : [...j.interest, me];
+  save(); render();
+}
+
+function confirmW(id, p) {
+  const j = jobs.find(x => x.id == id);
+  if (!j || j.status !== 'open' || j.confirmed.length >= j.need) return;
+  j.confirmed.push(p);
+  if (j.confirmed.length >= j.need) j.status = 'filled';
+  save();
+  S.log = `✅ SMS पाठवला: ${WN(p)} — तुमचे काम निश्चित झाले (Job ${id})`;
+  render();
+}
+
+function smsSim() {
+  const p = $('sp').value, t = $('st').value.trim();
+  const m = t.match(/^(YES|NO|होय|नाही)\s+(\d+)$/i);
+  let out = '';
+  if (!m) out = 'चुकीचे उत्तर. "YES 1001" किंवा "NO 1001" पाठवा.';
+  else {
+    const j = jobs.find(x => x.id == m[2]);
+    const yes = /^(yes|होय)$/i.test(m[1]);
+    if (!j) out = 'Job क्रमांक सापडला नाही.';
+    else if (!yes) { j.interest = j.interest.filter(x => x !== p); out = 'नोंद केली: नकार.'; }
+    else { if (!j.interest.includes(p)) j.interest.push(p); out = 'होकार नोंदवला! शेतकऱ्याने निश्चित केल्यावर काम पक्के होईल.'; }
+  }
+  save();
+  S.log = `📱 ${t}
+↩ ${out}`;
+  render();
+}
+
+// Calc
+function calcProfit() {
+  const g = id => num($(id).value);
+  const cost = g('c1') + g('c2') + g('c3') + g('c4') + g('c5');
+  const sell = g('s1') + g('s2') + g('s3');
+  const rev = g('q') * g('pr');
+  S.calc = { cost, sell, rev, net: rev - cost - sell };
+  S.calcIn = [...document.querySelectorAll('#calcf input')].map(i => i.value);
+  render();
+}
+
+// Map
+function openExternalGmaps() {
+  const pin = PINS.find(p => p.id === S.selectedPinId) || PINS[0];
+  const dLat = (S.userCoords.lat + pin.dLat).toFixed(6);
+  const dLng = (S.userCoords.lng + pin.dLng).toFixed(6);
+  window.open(`https://www.google.com/maps/dir/?api=1&destination=${dLat},${dLng}&travelmode=walking`, '_blank');
+}
+
+function renderMapArt() {
+  if (S.gpsMode === 'offline') {
+    return `<svg viewBox="0 0 400 400" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="400" fill="#f4efe1"/>
+      <rect x="25" y="30" width="140" height="110" rx="12" fill="#d8ebd2" stroke="#8ab882" stroke-width="3"/>
+      <rect x="210" y="40" width="160" height="120" rx="12" fill="#e2efd9" stroke="#8ab882" stroke-width="3"/>
+      <rect x="30" y="190" width="150" height="150" rx="12" fill="#d8ebd2" stroke="#8ab882" stroke-width="3"/>
+      <rect x="215" y="200" width="155" height="145" rx="12" fill="#e9f2df" stroke="#8ab882" stroke-width="3"/>
+      <path d="M0,165 L400,165 M190,0 L190,400" stroke="#d4a373" stroke-width="18" fill="none"/>
+      <text x="190" y="158" font-size="13" font-weight="bold" fill="#5c4033" text-anchor="middle">गाव रस्ता / Village Road</text>
+    </svg>`;
+  }
+  if (S.gpsMode === 'navic') {
+    return `<svg viewBox="0 0 400 400" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+      <rect width="400" height="400" fill="#1b4332"/>
+      <polygon points="20,30 180,25 175,160 25,155" fill="#40916c" stroke="#95d5b2" stroke-width="2.5"/>
+      <polygon points="195,25 375,35 370,170 190,160" fill="#52b788" stroke="#95d5b2" stroke-width="2.5"/>
+      <polygon points="25,175 180,180 175,355 20,350" fill="#2d6a4f" stroke="#95d5b2" stroke-width="2.5"/>
+      <polygon points="195,180 370,185 375,360 190,355" fill="#40916c" stroke="#95d5b2" stroke-width="2.5"/>
+      <text x="95" y="95" fill="#d8f3dc" font-size="13" font-weight="bold">गट क्र. ४२</text>
+      <text x="275" y="100" fill="#d8f3dc" font-size="13" font-weight="bold">गट क्र. ४३</text>
+    </svg>`;
+  }
+  return `<svg viewBox="0 0 400 400" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
+    <rect width="400" height="400" fill="#284b26"/>
+    <polygon points="15,20 195,15 185,175 20,165" fill="#3a7d34" stroke="#1e3a1c" stroke-width="4"/>
+    <polygon points="205,15 385,25 380,185 195,175" fill="#4c9a3e" stroke="#1e3a1c" stroke-width="4"/>
+    <polygon points="20,180 185,188 180,375 15,370" fill="#2f6b2b" stroke="#1e3a1c" stroke-width="4"/>
+    <polygon points="195,188 380,195 385,375 190,375" fill="#3f8838" stroke="#1e3a1c" stroke-width="4"/>
+    <path d="M0,175 Q200,165 400,190" stroke="#c2a378" stroke-width="11" fill="none"/>
+    <path d="M190,0 Q185,200 188,400" stroke="#c2a378" stroke-width="9" fill="none"/>
+  </svg>`;
+}
+
+function initHwCanvas() {
+  const canvas = $('hwCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth * 2;
+  canvas.height = canvas.offsetHeight * 2;
+  ctx.scale(2, 2);
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = '#145a32';
+  let drawing = false;
+  const pos = e => {
+    const r = canvas.getBoundingClientRect();
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const cy = e.touches ? e.touches[0].clientY : e.clientY;
+    return { x: cx - r.left, y: cy - r.top };
+  };
+  canvas.onmousedown = canvas.ontouchstart = e => {
+    drawing = true;
+    const p = pos(e);
+    ctx.beginPath(); ctx.moveTo(p.x, p.y);
+  };
+  canvas.onmousemove = canvas.ontouchmove = e => {
+    if (!drawing) return;
+    e.preventDefault();
+    const p = pos(e);
+    ctx.lineTo(p.x, p.y); ctx.stroke();
+  };
+  window.onmouseup = canvas.ontouchend = () => { drawing = false; };
+}
+
+function renderAuth() {
+  const r = S.auth === 'reg';
+  return `<div class="p" style="padding-top:32px">
+    <h1 style="text-align:center;color:var(--green-dark);font-size:28px">🌾 शेतकरी मित्र</h1>
+    <p style="text-align:center;color:var(--muted);font-weight:700;margin-bottom:16px">Smart Farmer & Worker App</p>
+    <div class="card">
+      <h2>${r ? 'नवीन नोंदणी (Register)' : 'लॉगिन (Login)'}</h2>
+      ${r ? `<input id="an" placeholder="तुमचे नाव"><select id="ar"><option value="farmer">👨‍🌾 शेतकरी (Farmer)</option><option value="worker">👷 कामगार (Worker)</option></select><input id="av" placeholder="गाव">` : ''}
+      <input id="ap" type="tel" maxlength="10" placeholder="मोबाईल नंबर (10 अंक)">
+      <input id="aw" type="password" placeholder="पासवर्ड (किमान 6 अक्षरे)">
+      <button class="btn" onclick="${r ? 'doReg()' : 'doLogin()'}">${r ? 'नोंदणी करा' : 'लॉगिन करा'}</button>
+      <button class="btn o" onclick="S.auth='${r ? 'login' : 'reg'}';render()">${r ? 'आधीच खाते आहे? लॉगिन' : 'नवीन खाते बनवा'}</button>
+    </div>
+    <div class="card">
+      <h2>⚡ झटपट डेमो प्रवेश (One-Tap Start)</h2>
+      <div class="row">
+        <button class="btn s" onclick="quickDemoLogin('farmer')">👨‍🌾 शेतकरी म्हणून उघडा</button>
+        <button class="btn b" onclick="quickDemoLogin('worker')">👷 कामगार म्हणून उघडा</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderBody() {
+  const v = S.v;
+  if (v === 'home') {
+    return `<div class="p">
+      <div class="grid-2">
+        <button class="tile" style="background:#c0392b" onclick="go('voice')"><span>🎙️</span>बोलून शेती सल्ला<small>Voice & AI</small></button>
+        <button class="tile" style="background:#1e824c" onclick="go('map')"><span>🗺️</span>शेत नकाशा व GPS<small>NavIC & Satellite</small></button>
+        <button class="tile" style="background:#2563eb" onclick="go('weather')"><span>⛅</span>हवामान व माती<small>Weather & Soil</small></button>
+        <button class="tile" style="background:#d97706" onclick="go('jobs')"><span>👷</span>काम व कामगार<small>Jobs & SMS</small></button>
+        <button class="tile" style="background:#8e44ad" onclick="go('wage')"><span>💵</span>हजेरी व पगार<small>Daily Wages</small></button>
+        <button class="tile" style="background:#0f766e" onclick="go('group')"><span>💰</span>नफा कॅल्क्युलेटर<small>Net Profit</small></button>
+        <button class="tile" style="background:#2980b9" onclick="go('plan')"><span>📅</span>आजची शेती कामे<small>Planner & Diary</small></button>
+        <button class="tile" style="background:#16a085" onclick="go('learn')"><span>📚</span>ज्ञान व सुरक्षा<small>Guides & 112</small></button>
+      </div>
+      <a href="tel:112" style="text-decoration:none"><button class="btn r" style="margin-top:14px">🚨 आणीबाणी मदत: 112 वर कॉल करा</button></a>
+    </div>`;
+  }
+
+  if (v === 'voice') {
+    const L = LANGS[S.lang];
+    return `<div class="p">
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span class="tag">🗣️ AI मदतनीस</span>
+          <button class="btn o" style="width:auto;padding:6px 14px;font-size:14px" onclick="speak(S.ans)">🔊 पुन्हा ऐका</button>
+        </div>
+        <div style="font-size:17px;font-weight:800;line-height:1.45">${esc(S.ans)}</div>
+      </div>
+
+      <div class="row" style="margin-bottom:10px">
+        <input id="qi" value="${esc(S.queryText)}" placeholder="येथे प्रश्न लिहा..." oninput="S.queryText=this.value" onkeydown="if(event.key==='Enter')askAI()">
+        <button class="btn" style="flex:0 0 85px" onclick="askAI()">विचारा</button>
+      </div>
+
+      <div class="row" style="margin-bottom:10px">
+        <button class="btn ${S.aiMode==='voice'?'s':'o'}" onclick="S.aiMode='voice';render()">🎤 आवाज</button>
+        <button class="btn ${S.aiMode==='kb'?'s':'o'}" onclick="S.aiMode='kb';render()">⌨️ कीबोर्ड</button>
+        <button class="btn ${S.aiMode==='hw'?'s':'o'}" onclick="S.aiMode='hw';render()">✍️ बोटाने लिहा</button>
+      </div>
+
+      ${S.aiMode === 'voice' ? `
+        <div class="card" style="text-align:center">
+          <button onclick="startMic()" style="width:86px;height:86px;border-radius:50%;border:0;background:${S.listen?'#1e824c':'#e74c3c'};color:#fff;font-size:38px;cursor:pointer">🎤</button>
+          <div style="font-weight:900;margin-top:8px">${S.listen ? 'ऐकत आहे... बोला' : 'माईक दाबा आणि बोला'}</div>
+        </div>
+      ` : S.aiMode === 'hw' ? `
+        <div class="card">
+          <div style="font-size:13px;font-weight:800;color:var(--muted)">बोटाने येथे लिहा:</div>
+          <canvas id="hwCanvas"></canvas>
+          <div class="row">
+            <button class="btn r" onclick="render()">🗑️ पुसा</button>
+            <button class="btn" onclick="askAI('कांदा बाजारभाव')">कांदा भाव विचारा</button>
+          </div>
+        </div>
+      ` : `
+        <div class="keyboard-box">
+          ${L.rows.map(row => `<div class="kb-row">${row.map(ch => `<button class="key-btn" onclick="S.queryText+='${ch}';render()">${ch}</button>`).join('')}</div>`).join('')}
+          <div class="kb-row">
+            <button class="key-btn space" onclick="S.queryText+=' ';render()">जागा / Space</button>
+            <button class="key-btn wide" onclick="S.queryText=Array.from(S.queryText).slice(0,-1).join('');render()">⌫</button>
+          </div>
+        </div>
+      `}
+    </div>`;
+  }
+
+  if (v === 'map') {
+    const activePin = PINS.find(p => p.id === S.selectedPinId) || PINS[0];
+    return `<div class="p">
+      <div class="row" style="margin-bottom:10px">
+        <button class="btn ${S.gpsMode==='gmaps'?'s':'o'}" style="padding:10px 4px;font-size:13px" onclick="S.gpsMode='gmaps';render()">🛰️ Google</button>
+        <button class="btn ${S.gpsMode==='navic'?'s':'o'}" style="padding:10px 4px;font-size:13px" onclick="S.gpsMode='navic';render()">🇮🇳 ISRO NavIC</button>
+        <button class="btn ${S.gpsMode==='offline'?'s':'o'}" style="padding:10px 4px;font-size:13px" onclick="S.gpsMode='offline';render()">📵 ऑफलाईन</button>
+      </div>
+
+      <div class="map-wrapper">
+        <div class="map-badge-top"><span class="gps-dot"></span><span>${S.gpsMode.toUpperCase()} GPS</span></div>
+        <button class="open-gmaps-btn" onclick="openExternalGmaps()">Google Maps ↗</button>
+        ${renderMapArt()}
+        <div class="map-pin" style="left:50%;top:52%" onclick="speak('माझे शेत')">
+          <div class="pin-bubble me"><span>👨‍🌾</span></div>
+          <div class="pin-label">माझे शेत</div>
+        </div>
+        ${PINS.map(p => `
+          <div class="map-pin ${p.id===S.selectedPinId?'selected':''}" style="left:${p.x}%;top:${p.y}%"
+               onclick="S.selectedPinId=${p.id};speak('${p.name} ${p.mins} मिनिटे दूर आहे');render()">
+            <div class="pin-bubble ${p.type}"><span>${p.type==='worker'?'👷':'🚜'}</span></div>
+            <div class="pin-label">${p.name}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="distance-panel">
+        <div style="font-weight:900;color:#86efac;margin-bottom:6px">📍 ${activePin.name}</div>
+        <div style="font-size:20px;font-weight:900">👣 ${activePin.steps} पावले &nbsp;•&nbsp; 🕒 ${activePin.mins} मिनिटे</div>
+        <button class="btn" style="margin-top:10px" onclick="openExternalGmaps()">🧭 Google Maps वरून रस्ता दाखवा</button>
+      </div>
+    </div>`;
+  }
+
+  if (v === 'weather') {
+    const L = LOCATIONS[S.locIdx];
+    const enc = encodeURIComponent(L.query);
+    return `<div class="p">
+      <div class="row" style="margin-bottom:10px">
+        ${LOCATIONS.map((item, idx) => `<button class="btn ${S.locIdx===idx?'s':'o'}" style="padding:8px 4px;font-size:13px" onclick="S.locIdx=${idx};render()">📍 ${item.name.split(' ')[0]}</button>`).join('')}
+      </div>
+      <div class="weather-card">
+        <div style="font-size:15px;font-weight:800">📍 ${L.name}</div>
+        <div style="font-size:44px;font-weight:900;margin:4px 0">${L.temp} ⛅</div>
+        <div style="font-size:14px;font-weight:700">💧 आर्द्रता: ${L.humidity} &nbsp;|&nbsp; 🌧️ पाऊस: ${L.rain} &nbsp;|&nbsp; 💨 वारा: ${L.wind}</div>
+      </div>
+      <div class="card">
+        <h2>🌱 माती परीक्षण व हेल्पलाइन</h2>
+        <p style="font-weight:800;margin-bottom:8px">जमीन: ${L.soil} | सामू (pH): ${L.ph}</p>
+        <a href="tel:18001801551" style="text-decoration:none"><button class="btn">📞 किसान कॉल सेंटर: 1800-180-1551</button></a>
+        <a href="https://www.google.com/maps/search/soil+testing+laboratory+near+${enc}" target="_blank" style="text-decoration:none"><button class="btn b">📍 जवळची माती परीक्षण प्रयोगशाळा (Maps)</button></a>
+      </div>
+    </div>`;
+  }
+
+  if (v === 'jobs') {
+    return `<div class="p">
+      ${cu().role === 'farmer' ? `
+        <div class="card">
+          <h2>👨‍🌾 नवीन काम टाका</h2>
+          <input id="jw" placeholder="कामाचा प्रकार (उदा. ऊस तोडणी)">
+          <input id="jv" placeholder="गाव">
+          <input id="jd" placeholder="तारीख / वेळ">
+          <div class="row"><input id="jg" type="number" placeholder="रोजंदारी ₹"><input id="jn" type="number" placeholder="मजूर संख्या"></div>
+          <button class="btn" onclick="postJob()">काम प्रसिद्ध करा</button>
+        </div>
+      ` : ''}
+
+      <h2>📋 उपलब्ध कामे</h2>
+      ${jobs.map(j => `
+        <div class="card">
+          <b>Job ${j.id}: ${esc(j.work)}</b> <span class="tag">${j.status==='open'?'खुले':'भरले'}</span>
+          <div style="margin:6px 0;font-weight:700">${esc(j.village)} • ${esc(j.date)} • ₹${j.wage}/दिवस • ${j.confirmed.length}/${j.need} निश्चित</div>
+          ${cu().role === 'worker' && j.status === 'open' ? `
+            <button class="btn ${j.interest.includes(me)?'s':''}" onclick="applyJob(${j.id})">
+              ${j.interest.includes(me) ? '✓ होकार दिला आहे' : '🙋 मी कामासाठी तयार आहे'}
+            </button>
+          ` : ''}
+          ${cu().role === 'farmer' ? j.interest.filter(p => !j.confirmed.includes(p)).map(p => `
+            <div class="row" style="align-items:center;margin-top:6px">
+              <b>🙋 ${esc(WN(p))}</b>
+              <button class="btn s" onclick="confirmW(${j.id},'${p}')">निश्चित करा</button>
+            </div>
+          `).join('') : ''}
+          ${j.confirmed.map(p => `<div style="color:var(--green);font-weight:800;margin-top:4px">✅ निश्चित कामगार: ${esc(WN(p))}</div>`).join('')}
+        </div>
+      `).join('')}
+
+      <div class="card">
+        <h2>📱 साधा फोन (Keypad SMS सिम्युलेटर)</h2>
+        <div class="sms">SHETKARI MITRA
+Job ID: ${jobs[0]?.id || 1001} (${esc(jobs[0]?.work || 'ऊस तोडणी')})
+Reply YES ${jobs[0]?.id || 1001} / NO ${jobs[0]?.id || 1001}</div>
+        <select id="sp">${users.filter(u => u.role === 'worker').map(u => `<option value="${u.phone}">${esc(u.name)} (${u.phone})</option>`).join('')}</select>
+        <input id="st" value="YES ${jobs[0]?.id || 1001}">
+        <button class="btn o" onclick="smsSim()">SMS उत्तर पाठवा</button>
+        ${S.log ? `<div class="sms">${esc(S.log)}</div>` : ''}
+      </div>
+    </div>`;
+  }
+
+  if (v === 'wage') {
+    const W = users.filter(u => u.role === 'worker').map(u => u.name);
+    const due = W.filter(n => !wages.paid[n]).length;
+    return `<div class="p">
+      <h2>💵 हजेरी आणि पगार</h2>
+      <div class="card">
+        <label style="font-weight:800">प्रति दिवस मजुरी (₹)</label>
+        <input type="number" value="${wages.rate}" onchange="wages.rate=num(this.value);save();render()">
+        <div class="big">${W.length} मजूर × ₹${wages.rate} = ₹${W.length * wages.rate}</div>
+        <div style="font-weight:800;color:var(--red);margin-top:4px">बाकी देणे: ₹${due * wages.rate}</div>
+      </div>
+      ${W.map(n => `
+        <div class="card row" style="align-items:center">
+          <b>👷 ${esc(n)}</b>
+          <button class="btn ${wages.paid[n]?'s':'o'}" onclick="wages.paid['${n}']=!wages.paid['${n}'];save();render()">
+            ${wages.paid[n] ? '✓ पगार दिला' : 'पैसे द्या (₹' + wages.rate + ')'}
+          </button>
+        </div>
+      `).join('')}
+    </div>`;
+  }
+
+  if (v === 'group') {
+    const c = S.calc, cv = S.calcIn || [];
+    const f = (id, ph, i) => `<input id="${id}" type="number" placeholder="${ph}" value="${cv[i] ?? ''}">`;
+    return `<div class="p">
+      <h2>💰 खरा नफा कॅल्क्युलेटर</h2>
+      <div class="card" id="calcf">
+        ${f('c1','बियाणे खर्च ₹',0)}${f('c2','खते व औषधे ₹',1)}${f('c3','मजुरी खर्च ₹',2)}${f('c4','सिंचन खर्च ₹',3)}${f('c5','यंत्रे/इतर ₹',4)}
+        ${f('s1','वाहतूक ₹',5)}${f('s2','पॅकिंग ₹',6)}${f('s3','बाजार कमिशन ₹',7)}${f('q','एकूण उत्पादन (किलो)',8)}${f('pr','विक्री दर ₹/किलो',9)}
+        <button class="btn o" onclick="calcProfit()">नफा हिशोब करा</button>
+        ${c ? `<div style="margin-top:10px;font-weight:800">एकूण उत्पन्न: ₹${c.rev}<br>एकूण खर्च: ₹${c.cost + c.sell}</div><div class="big">${c.net >= 0 ? 'निव्वळ नफा' : 'तोटा'}: ₹${Math.abs(c.net)}</div>` : ''}
+      </div>
+    </div>`;
+  }
+
+  if (v === 'plan') {
+    const k = new Date().toDateString();
+    const list = [['💧','मातीचा ओलावा हाताने तपासा'],['🍃','पानांवर कीड किंवा रोग आहे का पाहा'],['⛅','आजचा हवामान अंदाज तपासा']];
+    return `<div class="p">
+      <h2>📅 आजची शेती कामे</h2>
+      <select onchange="S.crop=this.value;render()">${['ऊस','कांदा','सोयाबीन','टोमॅटो'].map(c => `<option ${c===S.crop?'selected':''}>${c}</option>`).join('')}</select>
+      ${list.map((t, i) => `
+        <div class="card row" style="align-items:center">
+          <b>${t[0]} ${t[1]} (${S.crop})</b>
+          <button class="btn ${tasks[k+i]?'s':'o'}" style="flex:0 0 100px" onclick="tasks['${k+i}']=!tasks['${k+i}'];save();render()">${tasks[k+i]?'✓ झाले':'झाले'}</button>
+        </div>
+      `).join('')}
+      <h2>📒 शेती डायरी</h2>
+      <input id="dt" placeholder="उदा. आज ऊसाला पाणी दिले">
+      <button class="btn" onclick="if($('dt').value.trim()){diary.unshift({d:new Date().toLocaleDateString('mr-IN'),t:$('dt').value.trim()});save();render()}">नोंद जतन करा</button>
+      ${diary.map(d => `<div class="card"><b>${d.d}:</b> ${esc(d.t)}</div>`).join('')}
+    </div>`;
+  }
+
+  return `<div class="p">
+    <h2>📚 शेती ज्ञान, योजना व सुरक्षा</h2>
+    ${LEARN.map((l, i) => `
+      <div class="card">
+        <button class="btn ${S.learn===i?'s':''}" onclick="S.learn=S.learn===${i}?null:${i};render()">${l[0]} ${l[1]}</button>
+        ${S.learn === i ? `<p style="line-height:1.55;margin:10px 0;font-weight:700">${esc(l[2])}</p><button class="btn o" onclick="speak(LEARN[${i}][2])">🔊 माहिती ऐका</button>` : ''}
+      </div>
+    `).join('')}
+  </div>`;
+}
+
+function render() {
+  if (!cu()) { $('app').innerHTML = renderAuth(); return; }
+  $('app').innerHTML = `
+    <div class="topbar">
+      <div class="brand">
+        ${S.v !== 'home' ? `<button onclick="go('home')" style="background:#ffffff30;border:0;color:#fff;border-radius:10px;padding:4px 10px;font-size:18px;cursor:pointer">←</button>` : ''}
+        <span>🌾 ${LANGS[S.lang].title}</span>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center">
+        <div class="lang-pills">
+          <button class="lang-pill ${S.lang==='mr'?'active':''}" onclick="S.lang='mr';render()">मराठी</button>
+          <button class="lang-pill ${S.lang==='hi'?'active':''}" onclick="S.lang='hi';render()">हिंदी</button>
+          <button class="lang-pill ${S.lang==='en'?'active':''}" onclick="S.lang='en';render()">EN</button>
+        </div>
+        <button onclick="logout()" title="बाहेर पडा" style="background:#ffffff30;border:0;color:#fff;border-radius:10px;padding:4px 8px;font-size:16px;cursor:pointer">⎋</button>
+      </div>
+    </div>
+    <div style="padding:8px 14px 0"><span class="tag">${esc(cu().name)} • ${cu().role==='farmer'?'👨‍🌾 शेतकरी':'👷 कामगार'}</span></div>
+    ${renderBody()}
+    <div class="nav">
+      <button class="${S.v==='home'?'on':''}" onclick="go('home')"><span>🏠</span>मुख्य</button>
+      <button class="${S.v==='voice'?'on':''}" onclick="go('voice')"><span>🎙️</span>AI बोला</button>
+      <button class="${S.v==='map'?'on':''}" onclick="go('map')"><span>🗺️</span>नकाशा</button>
+      <button class="${S.v==='jobs'?'on':''}" onclick="go('jobs')"><span>👷</span>काम</button>
+      <button class="${S.v==='learn'?'on':''}" onclick="go('learn')"><span>📚</span>ज्ञान</button>
+    </div>
+  `;
+  if (S.v === 'voice' && S.aiMode === 'hw') initHwCanvas();
+}
+
+if ('geolocation' in navigator) {
+  navigator.geolocation.getCurrentPosition(pos => {
+    S.userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+  }, () => {});
+}
+
+render();
+</script>
+</body>
+</html>
